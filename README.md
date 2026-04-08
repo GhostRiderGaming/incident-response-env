@@ -1,3 +1,11 @@
+---
+title: Meta OpenEnv Incident Response
+emoji: 🚨
+colorFrom: red
+colorTo: gray
+sdk: docker
+app_port: 8000
+---
 # 🚨 IncidentResponseEnv — Production Incident Response RL Environment
 
 An [OpenEnv](https://github.com/meta-pytorch/OpenEnv)-compliant reinforcement learning environment where AI agents act as **on-call Site Reliability Engineers (SREs)**, diagnosing and remediating production outages in a simulated microservices infrastructure.
