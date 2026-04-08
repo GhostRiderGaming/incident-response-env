@@ -14,7 +14,7 @@ communication between client and server.
 from typing import Any, Dict, List, Optional
 
 from openenv.core.env_server.types import Action, Observation
-from pydantic import Field
+from pydantic import Field, model_validator
 
 
 class IncidentResponseAction(Action):
@@ -36,6 +36,24 @@ class IncidentResponseAction(Action):
         default_factory=dict,
         description="Arguments for the tool call. Varies by tool.",
     )
+
+    @model_validator(mode='before')
+    @classmethod
+    def parse_tool_args(cls, data: Any) -> Any:
+        import json
+        if isinstance(data, dict):
+            args = data.get('tool_args')
+            if isinstance(args, str):
+                try:
+                    # Strip out weird characters and carriage returns from UI text area
+                    args = args.strip()
+                    if args:
+                        data['tool_args'] = json.loads(args)
+                    else:
+                        data['tool_args'] = {}
+                except json.JSONDecodeError:
+                    pass  # let normal validation handle the error
+        return data
 
 
 class IncidentResponseObservation(Observation):
