@@ -38,7 +38,7 @@ except Exception as e:  # pragma: no cover
 try:
     from ..models import IncidentResponseAction, IncidentResponseObservation
     from .incident_response_env_environment import IncidentResponseEnvironment
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from models import IncidentResponseAction, IncidentResponseObservation
     from server.incident_response_env_environment import IncidentResponseEnvironment
 
