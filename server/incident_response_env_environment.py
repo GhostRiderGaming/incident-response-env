@@ -143,6 +143,9 @@ class IncidentResponseEnvironment(Environment):
         Returns:
             IncidentResponseObservation with tool result and updated progress
         """
+        if self._grader is None:
+            self.reset()
+
         if self._done:
             return IncidentResponseObservation(
                 done=True,
