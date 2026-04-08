@@ -1,0 +1,36 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-incident-response-env"
+version = "1.0.0"
+description = "Production Incident Response RL Environment for OpenEnv — AI agents act as on-call SREs diagnosing and remediating outages"
+requires-python = ">=3.10"
+dependencies = [
+    # Core OpenEnv runtime
+    "openenv-core[core]>=0.2.2",
+    # Environment-specific dependencies
+    "openai>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+# Server entry point
+server = "incident_response_env.server.app:main"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["incident_response_env", "incident_response_env.server"]
+package-dir = { "incident_response_env" = ".", "incident_response_env.server" = "server" }
