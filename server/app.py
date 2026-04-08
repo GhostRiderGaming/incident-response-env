@@ -52,6 +52,16 @@ app = create_app(
     max_concurrent_envs=1,  # increase this number to allow more concurrent WebSocket sessions
 )
 
+from fastapi.responses import RedirectResponse
+import os
+
+@app.get("/")
+async def root():
+    # If someone visits the root URL (like on HuggingFace Spaces), immediately redirect to the Web UI
+    if os.environ.get("ENABLE_WEB_INTERFACE", "").lower() == "true" or os.environ.get("SPACE_ID"):
+        return RedirectResponse(url="/web")
+    return {"message": "IncidentResponseEnv is running. Connect via API or enable WEB_INTERFACE."}
+
 
 def main(host: str = "0.0.0.0", port: int = 8000):
     """
