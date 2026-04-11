@@ -28,9 +28,12 @@ from incident_response_env import IncidentResponseAction, IncidentResponseEnv
 # ──────────────── Configuration ────────────────
 
 IMAGE_NAME = os.getenv("IMAGE_NAME")
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
-MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-72B-Instruct"
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+if HF_TOKEN is None:
+    raise ValueError("HF_TOKEN environment variable is required")
 BENCHMARK = "incident_response_env"
 MAX_STEPS_PER_TASK = {"alert_triage": 20, "root_cause_analysis": 30, "full_incident_response": 45}
 TEMPERATURE = 0.3
@@ -78,9 +81,9 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
 
 
-def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}", flush=True)
+    print(f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}", flush=True)
 
 
 # ──────────────── LLM Interaction ────────────────
@@ -125,7 +128,7 @@ def get_llm_action(client: OpenAI, messages: List[Dict]) -> Dict[str, Any]:
 
 async def run_task(task_name: str, env_url: str) -> Dict:
     """Run a single task and return the result."""
-    oai_client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    oai_client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
     if IMAGE_NAME:
         env = await IncidentResponseEnv.from_docker_image(IMAGE_NAME)
@@ -226,7 +229,7 @@ async def run_task(task_name: str, env_url: str) -> Dict:
             await env.close()
         except Exception as e:
             print(f"[DEBUG] env.close() error: {e}", flush=True)
-        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+        log_end(success=success, steps=steps_taken, rewards=rewards)
 
     return {"task": task_name, "score": score, "steps": steps_taken, "success": success}
 
